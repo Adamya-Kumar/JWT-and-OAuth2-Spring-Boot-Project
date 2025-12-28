@@ -1,6 +1,7 @@
 package com.codeshutlle.project.JWTAndOAuth2.config;
 
 import com.codeshutlle.project.JWTAndOAuth2.filter.JWTAuthFilter;
+import com.codeshutlle.project.JWTAndOAuth2.utils.OAuth2SuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JWTAuthFilter jwtAuthFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity){
@@ -28,7 +30,8 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(
                         SessionCreationPolicy.STATELESS
                 ))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth->oauth.successHandler(oAuth2SuccessHandler));
         return httpSecurity.build();
     }
 
