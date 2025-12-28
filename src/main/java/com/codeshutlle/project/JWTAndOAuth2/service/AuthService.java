@@ -3,6 +3,7 @@ package com.codeshutlle.project.JWTAndOAuth2.service;
 import com.codeshutlle.project.JWTAndOAuth2.DTO.LoginDTO;
 import com.codeshutlle.project.JWTAndOAuth2.DTO.LoginResponseDTO;
 import com.codeshutlle.project.JWTAndOAuth2.DTO.UserDTO;
+import com.codeshutlle.project.JWTAndOAuth2.entity.Session;
 import com.codeshutlle.project.JWTAndOAuth2.entity.User;
 import com.codeshutlle.project.JWTAndOAuth2.repository.UserRepository;
 import com.codeshutlle.project.JWTAndOAuth2.service.interfaces.IAuthService;
@@ -22,6 +23,7 @@ public class AuthService implements IAuthService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final SessionService sessionService;
 
     public UserDTO signupUser(UserDTO userDTO){
         User user =modelMapper.map(userDTO, User.class);
@@ -39,6 +41,7 @@ public class AuthService implements IAuthService {
 
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        sessionService.generateNewSession(user,refreshToken);
 
         return new LoginResponseDTO(accessToken,refreshToken);
     }
@@ -47,6 +50,8 @@ public class AuthService implements IAuthService {
     @Transactional
     public @Nullable LoginResponseDTO findUserBasedRefresheToken(String refreshToken) {
         Long userId  =jwtService.getUserIdByVerifyJwToken(refreshToken);
+        sessionService.validateSession(refreshToken);
+
         User user=userRepository.findById(userId).orElseThrow(()->new ExpressionException("User NOt found while verfiy the refresh token"));
                String newAccessToken =jwtService.generateAccessToken(user);
         return new LoginResponseDTO(newAccessToken,refreshToken);
