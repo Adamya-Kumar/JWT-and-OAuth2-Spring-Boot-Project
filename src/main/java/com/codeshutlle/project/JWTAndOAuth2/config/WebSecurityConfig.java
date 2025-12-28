@@ -24,7 +24,7 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity){
         httpSecurity
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**","/home.html").permitAll()
                         .anyRequest().authenticated()
                 ).csrf(csrdConfig->csrdConfig.disable())
                 .sessionManagement(sessionConfig->sessionConfig.sessionCreationPolicy(
